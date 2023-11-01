@@ -1,3 +1,18 @@
+//////////////////////////////////////
+//
+// Memory -- single cycle version
+//
+// written for CS/ECE 552, Spring '07
+// Pratap Ramamurthy, 19 Mar 2006
+//
+// Modified for CS/ECE 552, Spring '18
+// Gokul Ravi, 08 Mar 2018
+//
+// This is a byte-addressable,
+// 16-bit wide memory
+// Note: The last bit of the address has to be 0.
+//
+// All reads happen combinationally with zero delay.
 // All writes occur on rising clock edge.
 // Concurrent read and write not allowed.
 //
@@ -13,7 +28,7 @@
 //
 //////////////////////////////////////
 
-module memory_data (data_out, data_in, addr, enable, wr, clk, rst);
+module memory_instruction (data_out, data_in, addr, enable, wr, clk, rst);
 
    parameter ADDR_WIDTH = 16;
    output  [15:0] data_out;
@@ -37,15 +52,14 @@ module memory_data (data_out, data_in, addr, enable, wr, clk, rst);
       if (rst) begin
          //load loadfile_all.img
          if (!loaded) begin
-            $readmemh("loadfile_mem.img", mem);
+            $readmemh("loadfile_3.img", mem);
             loaded = 1;
          end
           
       end
       else begin
-         if (~enable & wr) begin
+         if (enable & wr) begin
 	        mem[addr[ADDR_WIDTH-1 :1]] = data_in[15:0];       // The actual write
-           $display("Data in: %h", data_in);
          end
       end
    end

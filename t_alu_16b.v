@@ -244,14 +244,14 @@ $display("PADDSB tests passed!");
 
 			#10
 
-			//$display("Must shift %b by %d", in1, in2[3:0]);
-			//$display("Target: %b", SLL);
+			$display("Must shift %b by %d", in1, in2[3:0]);
+			$display("Target: %b", SLL);
 
 			if(out != SLL) begin
-				//$display("ERROR: out should be %b, not %b!", SLL, out);
+			    $display("ERROR: out should be %b, not %b!", SLL, out);
 				$stop();
 			end
-			//$display("Target Reached!! %b", out);
+			$display("Target Reached!! %b", out);
 		end
 
 		//$display("SLL: Success");

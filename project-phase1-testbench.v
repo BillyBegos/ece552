@@ -14,6 +14,7 @@ module cpu_tb();
    wire [15:0] MemData;
    wire [15:0] nextPC;
    wire [2:0] flag, ccc;
+   wire [3:0] rt, rd, rs;
 
    wire        Halt;         /* Halt executed and in Memory or writeback stage */
         
@@ -176,8 +177,16 @@ module cpu_tb();
    assign MemAddress = DUT.memAddress;
    // Address to access memory with (for both reads and writes to memory, 16 bits)
    
-   assign MemData = DUT.memData;
+   assign MemData = DUT.SrcData2;
    // Data to be written to memory for memory writes (16 bits)
+
+   assign rt = DUT.rt;
+
+   assign rd = DUT.rd;
+
+   assign rs = DUT.rs;
+
+   assign ccc = DUT.flag;
    
 //   assign Halt = DUT.memory0.halt; //You won't need this because it's part of the main cpu interface
    // Is processor halted (1 bit signal)

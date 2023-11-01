@@ -22,6 +22,7 @@ wire wr;
 wire [15:0] data_in;
 wire [15:0] data_out;
 wire [15:0] PC_2;
+wire [15:0] B_PC_2;
 wire [4:0] offset_sll;
 wire [15:0] sign_extend_offset;
 
@@ -32,7 +33,10 @@ assign temp1 = rs & 16'hFFFE;
 assign temp2 = sign_extend_offset;
 
 CLA_16b adder(.A(temp1), .B(temp2), .Sum(addr), .Cout(), .ovfl(), .addSub(1'b0));
+
+
 CLA_16b pc2(.A(PC), .B(16'h2), .Sum(PC_2), .Cout(), .ovfl(), .addSub(1'b0));
+CLA_16b b_pc2(.A(PC_2), .B(sign_extend_offset), .Sum(B_PC_2), .Cout(), .ovfl(), .addSub(1'b0));
 
 assign offset = inst[3:0];
 assign immediate = inst[7:0];
@@ -59,7 +63,7 @@ assign immediate = inst[7:0];
 wire [15:0] addOut, paddsbOut, tempAddOut, tempSubOut, subOut, xorOut, shiftOut, redOut;
 
 wire OvflAdd,OvflSub;
-
+wire [15:0] b;
 CLA_16b add(.A(rs), .B(rt), .Sum(addOut), .Cout(), .ovfl(OvflAdd), .addSub(1'b0));
 CLA_16b sub(.A(rs), .B(rt), .Sum(subOut), .Cout(), .ovfl(OvflSub), .addSub(1'b1));
 
@@ -67,9 +71,10 @@ CLA_16b sub(.A(rs), .B(rt), .Sum(subOut), .Cout(), .ovfl(OvflSub), .addSub(1'b1)
 RED_16b red(.A(rs), .B(rt), .Sum(redOut));
 PADDSB_16b paddsb(.Sum(paddsbOut), .A(rs), .B(rt));
 
-base_3_shifter shift(.Mode(Opcode[1:0]), .Shift_Out(shiftOut),.Shift_In(rs),.Shift_Val(rt[3:0]));
+base_3_shifter shift(.Mode(Opcode[1:0]), .Shift_Out(shiftOut),.Shift_In(rs),.Shift_Val(rt[11:8]));
 
 assign xorOut =  rs ^ rt;
+
 
 assign rd = (Opcode == 4'd0) ? addOut:
 				 (Opcode == 4'd1) ? subOut:
@@ -81,19 +86,31 @@ assign rd = (Opcode == 4'd0) ? addOut:
 				 (Opcode == 4'd7) ? paddsbOut:
 				 (Opcode == 4'd8) ? addOut:
 				 (Opcode == 4'd9) ? addOut:
+				 (Opcode == 4'b1110) ? B_PC_2 :
 				 rs | rt;
 /*
     FLAG[0] = Z = zero
     FLAG[1] = V = overflow
     FLAG[2] = N = sign
 */
-assign FLAG[0] = (rd == 16'd0);
-assign FLAG[1] = ((Opcode == 4'd0) & (OvflAdd)) ? 1'b1 :
-				 ((Opcode == 4'd1) & (OvflSub)) ? 1'b1 :
-				 1'b0;
-assign FLAG[2] = ((Opcode == 4'd0) & (addOut[15])) ? 1'b1 :
-				 ((Opcode == 4'd1) & (subOut[15])) ? 1'b1 :
-				 1'b0;
+wire zEnable, vEnable, nEnable, n, v;
+assign v = ((Opcode == 4'd0) & (OvflAdd)) ? 1'b1 :
+			((Opcode == 4'd1) & (OvflSub)) ? 1'b1 :
+			1'b0;
+assign n = ((Opcode == 4'd0) & (addOut[15])) ? 1'b1 :
+			((Opcode == 4'd1) & (subOut[15])) ? 1'b1 :
+			1'b0;
+
+assign zEnable = (Opcode == 4'd0) | (Opcode == 4'd1) | (Opcode == 4'd2) |(Opcode == 4'd4) |(Opcode == 4'd5) |(Opcode == 4'd6);
+assign vEnable = (Opcode == 4'd0) | (Opcode == 4'd1);
+assign nEnable = (Opcode == 4'd0) | (Opcode == 4'd1);
+
+
+
+dff zeroFlag(.q(FLAG[0]),.d((rd == 16'd0)),.wen(zEnable),.clk(clk),.rst(rst));
+dff overflowFlag(.q(FLAG[1]),.d(v),.wen(vEnable),.clk(clk),.rst(rst));
+dff signFlag(.q(FLAG[2]),.d(n),.wen(nEnable),.clk(clk),.rst(rst));
+
 endmodule
 
 
