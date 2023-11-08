@@ -40,6 +40,13 @@ assign rt_full = (ALUSrc) ? imm : SrcData2;
 assign imm = (memRead | memWrite) ? {{12{1'b0}},inst[3:0]} << 1 :
                    (LLB) ? {{8{1'b0}},inst[7:0]} : 
                    (inst[7:0] << 8);
+
+
+
+wire ifidHalt, idexHalt, exmemHalt, memwbHalt, pcregHalt;
+wire ifidStall, idexStall, exmemS
+
+                   /*
 RegisterFile regf(.clk(clk), .rst(~rst_n), .SrcReg1(rs), .SrcReg2(rt), .DstReg(writeRegister), .WriteReg(RegWrite), .DstData(writeData), .SrcData1(SrcData1), .SrcData2(SrcData2));
 PC_Register pcReg(.clk(clk), .rst(~rst_n), .d(brAddr), .wen(~hlt), .q(pc));
 ALU_16b alu(.rd(memAddress), .rs(rs_full), .rt(rt_full), .Opcode(inst[15:12]), .FLAG(flag), .PC(pc), .clk(clk),.rst(~rst_n),.hlt(hlt), .inst(inst));
@@ -48,7 +55,21 @@ PC_control pcCon(.branch(branchEnable),.C(inst[11:9]), .I(inst[8:0]), .F(flag), 
 memory_instruction instr(.data_out(inst), .data_in(16'b1), .addr(pc), .clk(clk), .rst(~rst_n), .enable(1'b1), .wr(1'b0));
 memory_data data(.data_out(memData), .data_in(SrcData2), .addr(memAddress), .enable(memRead), .wr(memWrite), .clk(clk), .rst(~rst_n));
 
+*/
 
+//INSTRUCTION FETCH
+ifid fetchDecode(.opcIn(), .pcIn(), .instrIn(instr), .opcOut(), .pcOut(), .instrOut(), .clk(clk), .rst(~rst), .en())
+
+//INSTRUCTION DECODE
+
+
+//EXECUTE
+
+
+//MEMORY
+
+
+//WRITEBACK
 
 assign writeRegister = (regDst) ? rd : rt;
 assign writeData = (MemtoReg) ? memData : (PCS) ? pcOut : memAddress;
