@@ -101,9 +101,9 @@ assign n = ((Opcode == 4'd0) & (addOut[15])) ? 1'b1 :
 			((Opcode == 4'd1) & (subOut[15])) ? 1'b1 :
 			1'b0;
 
-assign zEnable = (Opcode == 4'd0) | (Opcode == 4'd1) | (Opcode == 4'd2) |(Opcode == 4'd4) |(Opcode == 4'd5) |(Opcode == 4'd6);
-assign vEnable = (Opcode == 4'd0) | (Opcode == 4'd1);
-assign nEnable = (Opcode == 4'd0) | (Opcode == 4'd1);
+assign zEnable = ((Opcode == 4'd0) | (Opcode == 4'd1) | (Opcode == 4'd2) |(Opcode == 4'd4) |(Opcode == 4'd5) |(Opcode == 4'd6)) & |inst;
+assign vEnable = ((Opcode == 4'd0) | (Opcode == 4'd1)) & |inst;
+assign nEnable = ((Opcode == 4'd0) | (Opcode == 4'd1)) & |inst;
 
 
 

@@ -85,12 +85,13 @@ endmodule;
 module RegisterFile(input clk, input rst, input [3:0] SrcReg1, input [3:0] SrcReg2, input [3:0]
 DstReg, input WriteReg, input [15:0] DstData, inout [15:0] SrcData1, inout [15:0] SrcData2);
 
-wire [15:0] ReadWordline1, ReadWordline2, WriteWordline, D;
+wire [15:0] ReadWordline1, ReadWordline2, WriteWordline, D, s1, s2;
 
 wire[15:0] tempSrcData1, tempSrcData2;
 
 assign D = DstData;
-
+assign s1 = SrcData1 & 16'hffff;
+assign s2 = SrcData2 & 16'hffff;
 ReadDecoder_4_16 rd0(.RegId(SrcReg1),.Wordline(ReadWordline1));
 ReadDecoder_4_16 rd1(.RegId(SrcReg2),.Wordline(ReadWordline2));
 WriteDecoder_4_16 wd0(.RegId(DstReg),.WriteReg(WriteReg),.Wordline(WriteWordline));
@@ -113,8 +114,8 @@ Register r13(.clk(clk), .rst(rst), .D(D), .WriteReg(WriteWordline[13]), .ReadEna
 Register r14(.clk(clk), .rst(rst), .D(D), .WriteReg(WriteWordline[14]), .ReadEnable1(ReadWordline1[14]), .ReadEnable2(ReadWordline2[14]), .Bitline1(tempSrcData1), .Bitline2(tempSrcData2));
 Register r15(.clk(clk), .rst(rst), .D(D), .WriteReg(WriteWordline[15]), .ReadEnable1(ReadWordline1[15]), .ReadEnable2(ReadWordline2[15]), .Bitline1(tempSrcData1), .Bitline2(tempSrcData2));
 
-//if DstReg is equal to either srcreg, then assign srcdata[x] to dstdata in the same cycle, otherwise use the value from the registers
-assign SrcData1 =  tempSrcData1; //write-before-read bypassing
-assign SrcData2 =  tempSrcData2;
+//read before write bypassing
+ assign SrcData1 =  (DstReg == SrcReg1) ? DstData : tempSrcData1; 
+ assign SrcData2 =  (DstReg == SrcReg2) ? DstData : tempSrcData2;
 
 endmodule;
