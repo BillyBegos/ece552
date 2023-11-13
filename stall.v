@@ -22,12 +22,12 @@ module or_gate (
   assign out = a | b;
 endmodule
 
-module StallControl(PC_WriteEn,IFID_WriteEn,Stall_flush,EX_MemRead,EX_rt,idRs,idRt,ID_Op);
+module StallControl(PC_WriteEn,IFID_WriteEn,Stall_flush,EX_MemRead,EX_rt,ID_rs,ID_rt,ID_Op);
   output PC_WriteEn,IFID_WriteEn,Stall_flush;
   wire PC_WriteEn,IFID_WriteEn,Stall_flush;
-  input EX_MemRead,EX_rt,idRs,idRt;
+  input EX_MemRead,EX_rt,ID_rs,ID_rt;
   input [5:0] ID_Op;
-  wire [4:0] EX_rt,idRs,idRt,xorRsRt,xorRtRt;
+  wire [4:0] EX_rt,ID_rs,ID_rt,xorRsRt,xorRtRt;
   wire [5:0] xoropcodelw,xoropcodexori;
   wire EX_MemRead;
 
@@ -37,19 +37,19 @@ module StallControl(PC_WriteEn,IFID_WriteEn,Stall_flush,EX_MemRead,EX_rt,idRs,id
   assign PC_WriteEn = ~Condition;
   assign IFID_WriteEn = ~Condition;
 
-  xor_gate xorRsRt4 (.out(xorRsRt[4]), .a(EX_rt[4]), .b(idRs[4]));
-  xor_gate xorRsRt3 (.out(xorRsRt[3]), .a(EX_rt[3]), .b(idRs[3]));
-  xor_gate xorRsRt2 (.out(xorRsRt[2]), .a(EX_rt[2]), .b(idRs[2]));
-  xor_gate xorRsRt1 (.out(xorRsRt[1]), .a(EX_rt[1]), .b(idRs[1]));
-  xor_gate xorRsRt0 (.out(xorRsRt[0]), .a(EX_rt[0]), .b(idRs[0]));
+  xor_gate xorRsRt4 (.out(xorRsRt[4]), .a(EX_rt[4]), .b(ID_rs[4]));
+  xor_gate xorRsRt3 (.out(xorRsRt[3]), .a(EX_rt[3]), .b(ID_rs[3]));
+  xor_gate xorRsRt2 (.out(xorRsRt[2]), .a(EX_rt[2]), .b(ID_rs[2]));
+  xor_gate xorRsRt1 (.out(xorRsRt[1]), .a(EX_rt[1]), .b(ID_rs[1]));
+  xor_gate xorRsRt0 (.out(xorRsRt[0]), .a(EX_rt[0]), .b(ID_rs[0]));
   or_gate OrRsRt1 (.out(OrRsRt), .a(xorRsRt[4]), .b(xorRsRt[3]), .c(xorRsRt[2]), .d(xorRsRt[1]), .e(xorRsRt[0]));
   not_gate notgate1 (.out(notOrRsRt), .in(OrRsRt));
 
-  xor_gate xorRtRt4 (.out(xorRtRt[4]), .a(EX_rt[4]), .b(idRt[4]));
-  xor_gate xorRtRt3 (.out(xorRtRt[3]), .a(EX_rt[3]), .b(idRt[3]));
-  xor_gate xorRtRt2 (.out(xorRtRt[2]), .a(EX_rt[2]), .b(idRt[2]));
-  xor_gate xorRtRt1 (.out(xorRtRt[1]), .a(EX_rt[1]), .b(idRt[1]));
-  xor_gate xorRtRt0 (.out(xorRtRt[0]), .a(EX_rt[0]), .b(idRt[0]));
+  xor_gate xorRtRt4 (.out(xorRtRt[4]), .a(EX_rt[4]), .b(ID_rt[4]));
+  xor_gate xorRtRt3 (.out(xorRtRt[3]), .a(EX_rt[3]), .b(ID_rt[3]));
+  xor_gate xorRtRt2 (.out(xorRtRt[2]), .a(EX_rt[2]), .b(ID_rt[2]));
+  xor_gate xorRtRt1 (.out(xorRtRt[1]), .a(EX_rt[1]), .b(ID_rt[1]));
+  xor_gate xorRtRt0 (.out(xorRtRt[0]), .a(EX_rt[0]), .b(ID_rt[0]));
   or_gate OrRtRt1 (.out(OrRtRt), .a(xorRtRt[4]), .b(xorRtRt[3]), .c(xorRtRt[2]), .d(xorRtRt[1]), .e(xorRtRt[0]));
   not_gate notgate2 (.out(notOrRtRt), .in(OrRtRt));
 
@@ -73,5 +73,12 @@ module StallControl(PC_WriteEn,IFID_WriteEn,Stall_flush,EX_MemRead,EX_rt,idRs,id
   and_gate and2 (.out(xoroprt), .a(xorop), .b(notOrRtRt));
   or_gate OrEXIDRsRt (.out(OrOut), .a(notOrRsRt), .b(xoroprt));
   and_gate AndCondition (.out(Condition), .a(EX_MemRead), .b(OrOut));
+
+endmodule
+
+
+
+
+
 
 endmodule

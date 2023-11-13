@@ -52,3 +52,4 @@ input jump,bne,jr;
   or_gate or1 (.out(IF_flush), .a(jump), .b(bne), .c(jr));
   or_gate or2 (.out(ID_flush), .a(bne), .b(jr));
 endmodule
+
