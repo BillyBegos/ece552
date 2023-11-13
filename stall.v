@@ -75,10 +75,3 @@ module StallControl(PC_WriteEn,IFID_WriteEn,Stall_flush,EX_MemRead,EX_rt,ID_rs,I
   and_gate AndCondition (.out(Condition), .a(EX_MemRead), .b(OrOut));
 
 endmodule
-
-
-
-
-
-
-endmodule
