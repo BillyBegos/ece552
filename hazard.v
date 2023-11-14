@@ -4,7 +4,7 @@ reg tempStall;
 
 wire enable;
 
-assign enable = br | |opcode;
+assign enable = br;
 
 always@(*) begin
     case(opcode)

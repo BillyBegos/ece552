@@ -43,7 +43,7 @@ module memory_data (data_out, data_in, addr, enable, wr, clk, rst);
           
       end
       else begin
-         if (~enable & wr) begin
+         if (enable & wr) begin
 	        mem[addr[ADDR_WIDTH-1 :1]] = data_in[15:0];       // The actual write
            $display("Data in: %h", data_in);
          end

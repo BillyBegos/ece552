@@ -71,7 +71,7 @@ CLA_16b sub(.A(rs), .B(rt), .Sum(subOut), .Cout(), .ovfl(OvflSub), .addSub(1'b1)
 RED_16b red(.A(rs), .B(rt), .Sum(redOut));
 PADDSB_16b paddsb(.Sum(paddsbOut), .A(rs), .B(rt));
 
-base_3_shifter shift(.Mode(Opcode[1:0]), .Shift_Out(shiftOut),.Shift_In(rs),.Shift_Val(rt[11:8]));
+base_3_shifter shift(.Mode(Opcode[1:0]), .Shift_Out(shiftOut),.Shift_In(rs),.Shift_Val(rt[3:0]));
 
 assign xorOut =  rs ^ rt;
 

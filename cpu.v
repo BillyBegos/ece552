@@ -113,7 +113,7 @@ assign rs_full = (idexMemRead | idexMemWrite) ? aluIn1 & 16'hfffe :
               (idexLLB) ? (aluIn1 & 16'hff00) :
               (idexLHB) ? (aluIn1 & 16'h00ff) : aluIn1;
 
-assign rt_full = (idexAluSrc) ? idexImm : idexSrcData2;
+assign rt_full = (idexAluSrc) ? idexImm : aluIn2;
 
 
 
