@@ -1,6 +1,6 @@
 module PC_Register (q, d, wen, clk, rst);
-
-    output         [15:0] q,d;
+	input [15:0] d;
+    output         [15:0] q;
     input 	   	   wen, clk, rst; 
 	dff ff0(.q(q[0]), .d(d[0]), .wen(wen), .clk(clk), .rst(rst));
 	dff ff1(.q(q[1]), .d(d[1]), .wen(wen), .clk(clk), .rst(rst));

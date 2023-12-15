@@ -18,7 +18,8 @@ module PC_control(input branch, input [2:0]C, input [8:0]I, input [2:0]F, input 
 	assign zeroExtend = 6'b0;
 	assign sign_extend_offset = (offset_sll[9] == 1) ? {oneExtend, offset_sll} : {zeroExtend, offset_sll}; 
 	
-	CLA_16b pc2(.A(PC_in), .B(16'h2), .Sum(notTakenAddr), .Cout(Cout), .ovfl(Ovfl), .addSub(1'b0));
+	//CLA_16b pc2(.A(PC_in), .B(16'h2), .Sum(notTakenAddr), .Cout(Cout), .ovfl(Ovfl), .addSub(1'b0));
+	assign notTakenAddr = PC_in + 2;
 	CLA_16b offset(.A(notTakenAddr), .B(sign_extend_offset), .Sum(takenAddr), .Cout(Cout), .ovfl(Ovfl), .addSub(1'b0));
 
 always@(*) begin
@@ -37,5 +38,9 @@ always@(*) begin
 
 assign PC_out = (branch) ? addr : notTakenAddr;
 assign branchTaken = (branch) ? take : 1'b0;
+
+// always @(*) begin
+//     $display("pc in: %b, pc out %b", PC_in, PC_out);
+// end
 
 endmodule

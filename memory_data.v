@@ -35,7 +35,6 @@ module memory_data (data_out, data_in, addr, enable, wr, clk, rst);
 
    always @(posedge clk) begin
       if (rst) begin
-         //load loadfile_all.img
          if (!loaded) begin
             $readmemh("loadfile_mem.img", mem);
             loaded = 1;

@@ -52,7 +52,7 @@ module memory_instruction (data_out, data_in, addr, enable, wr, clk, rst);
       if (rst) begin
          //load loadfile_all.img
          if (!loaded) begin
-            $readmemh("loadfile_2.img", mem);
+            $readmemh("loadfile_1.img", mem);
             loaded = 1;
          end
           
