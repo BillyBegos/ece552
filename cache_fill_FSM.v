@@ -1,42 +1,69 @@
-module cache_fill_FSM(clk, rst, miss_detected, way_0, way_1, miss_address, fsm_busy, write_data_array, write_tag_array,memory_address, memory_data_valid, word_sel);
-input clk, rst;
-input miss_detected; // active high when tag match logic detects a miss
-input memory_data_valid; // active high indicates valid data returning on memory bus
-input [15:0] miss_address; // address that missed the cache
-//input way_0, way_1;
-output way_0, way_1;
-output fsm_busy; // asserted while FSM is busy handling the miss (can be used as pipeline stall signal)
-output write_data_array; // write enable to cache data array to signal when filling with memory_data
-output write_tag_array; // write enable to cachetag array to signal when all words are filled in to data array
-output [15:0] memory_address; // address to read from memory
-output [7:0] word_sel;
-//input [15:0] memory_data; // data returned by memory (afterdelay)
+/* Cache Fill FSM Controller
+ *  
+ * wchen329@wisc.edu
+ */
+module Cache_fill_FSM(clk, rst_n, miss_detected, miss_address, fsm_busy, write_data_array, write_tag_array, memory_address, cache_wr_address, memory_data, memory_data_valid, arb_force_reset, EOB);
 
-wire [15:0] fill_address;
-wire curr_state; // 0=idle and 1=wait
-wire next_state;
-wire chunks_left;
-wire [3:0] cnt_in, cnt_out, sum, addr_out, addr_in;
+input clk, rst_n;
+input miss_detected;
+input [15:0] miss_address;
+input [15:0] memory_data;
+input memory_data_valid;
+input arb_force_reset;
 
-dff state(.clk(clk), .rst(rst), .q(curr_state), .d(next_state), .wen(1'b1));
-dff fsm_busy_ff(.clk(clk), .rst(rst), .q(fsm_busy_out), .d(fsm_busy_in), .wen(1'b1));
+output fsm_busy;
+output write_data_array;
+output write_tag_array;
+output [15:0] memory_address, cache_wr_address;
+output EOB;
 
-dff counter1[3:0](.clk(clk), .rst(rst | cnt_out == 4'b1011), .q(cnt_out), .d(cnt_in), .wen(next_state));
-dff counter2[3:0](.clk(clk), .rst(rst | ~curr_state), .q(addr_out), .d(addr_in), .wen(memory_data_valid));
-CLA_4b inc2(.A(addr_out), .B(4'b1), .Sum(addr_in), .Cin(1'b0), .Cout(), .P(), .G());
-CLA_4b inc(.A(cnt_out), .B(4'b1), .Sum(sum), .Cin(1'b0), .Cout(), .P(), .G());
-offset3to8 instr_offset(.offset(fill_address[3:1]), .WordEnable(word_sel));
+// Register Wires
+wire [3:0] count_reg_D, count_reg_Q, addr_creg_D, addr_creg_Q;
+wire [15:0] base_address; // address with 0 offset
+wire [15:0] current_address;	// base address for miss handling. First, fetch from bit offset 0, then 2, 4, 6, 8, 10, 12, 14.
+wire [15:0] next_address; // next address state
+wire [15:0] current_address_c;
+wire [15:0] next_address_c;
+wire [15:0] current_address_plus_two, current_address_plus_two_c;
 
-assign next_state = (~curr_state) ? (miss_detected) : (chunks_left);
-assign chunks_left = (curr_state & ~(cnt_out == 4'b1011));
-assign cnt_in = (~curr_state) ? 1'b1 : (miss_detected ) ? sum : cnt_out;
-assign fsm_busy_in = (~curr_state) ? miss_detected : chunks_left;
-assign write_data_array = curr_state & memory_data_valid;
-assign write_tag_array = curr_state & cnt_out == 4'b1011;
-assign fill_address = rst ? 16'b0 : {miss_address[15:4], addr_out << 1};
-assign memory_address = rst ? 16'b0 : {miss_address[15:4], cnt_out << 1};
-assign way_0 = (cnt_out[0] == 0);
-assign way_1 = (cnt_out[1] == 1);
-assign fsm_busy = fsm_busy_out | next_state;
+// Implementation Detail
+
+Register_4bit COUNT_REG(clk, ~miss_detected | ~rst_n | (count_reg_Q == 8) | arb_force_reset, count_reg_D , (count_reg_Q != 8) & (memory_data_valid), 1'b1, 1'b0, count_reg_Q, ); // holds the current "count state"
+Register_4bit ADDR_COUNT_REG(clk, ~miss_detected | ~rst_n | arb_force_reset, addr_creg_D, (addr_creg_Q != 9), 1'b1, 1'b0, addr_creg_Q, ); // hold the count of how many address increments were made
+// Register WORKING_ADDRESS(clk, ~miss_detected | ~rst_n, next_address, 1'b1, 1'b1, 1'b0, current_address, );
+// Register WORKING_ADDRESS_FOR_CACHE(clk, ~miss_detected | ~rst_n, next_address_c, 1'b1, 1'b1, 1'b0, current_address_c, );
+
+Register WORKING_ADDRESS(.clk(clk), .rst(~miss_detected | ~rst_n), .D(next_address), .WriteReg(1'b1), .ReadEnable1(1'b1), .ReadEnable2(1'b0), .Bitline1(current_address), .Bitline2());
+Register WORKING_ADDRESS_FOR_CACHE(.clk(clk), .rst(~miss_detected | ~rst_n), .D(next_address_c), .WriteReg(1'b1), .ReadEnable1(1'b1), .ReadEnable2(1'b0), .Bitline1(current_address_c), .Bitline2());
+// Incrementer for segment count and delay count 
+// CLA_4b COUNT_REQ_INC(,, count_reg_D, count_reg_Q, {3'b000 , miss_detected}, 1'b0); 
+// CLA_4b COUNT_ADR_INC(,, addr_creg_D, addr_creg_Q, {3'b000 , miss_detected}, 1'b0); 
+CLA_4b COUNT_REQ_INC(.A(count_reg_Q),.B({3'b000 , miss_detected}),.Cin(1'b0),.Sum(count_reg_D), .P(), .G(),. Cout());
+CLA_4b COUNT_ADR_INC(.A(addr_creg_Q),.B({3'b000 , miss_detected}),.Cin(1'b0),.Sum(addr_creg_D), .P(), .G(),. Cout());
+// Increment the current address by two
+// CLA_16b ADDRESS_INC(current_address_plus_two, current_address, 16'b0000000000000010);
+// CLA_16b ADDRESS_INC_CACHE(current_address_plus_two_c, current_address_c, 16'b0000000000000010);
+
+CLA_16b ADDRESS_INC(.A(current_address),.B(16'd2),.Sum(current_address_plus_two),.Cout(),.ovfl(),.addSub(1'b0));
+CLA_16b ADDRESS_INC_CACHE(.A(current_address_c),.B(16'd2),.Sum(current_address_plus_two_c),.Cout(),.ovfl(),.addSub(1'b0));
+
+// Wire assignments
+assign base_address = {miss_address[15:4], {4'b0000}};
+
+// Assign state
+assign next_address = (addr_creg_Q == 0) ? base_address : current_address_plus_two;
+assign next_address_c = (addr_creg_Q == 0) ? base_address :
+			(memory_data_valid) ? current_address_plus_two_c
+			: current_address_c;
+
+assign mem_read_done = (addr_creg_Q == 9) ? 1 : 0;
+assign EOB = (mem_read_done | (addr_creg_Q == 0));
+
+// Assign state outputs
+assign write_tag_array = (count_reg_Q == 8) ? 1 : 0;
+assign write_data_array = (memory_data_valid & miss_detected) ? 1 : 0;
+assign fsm_busy = miss_detected;
+assign memory_address = current_address;
+assign cache_wr_address = current_address_c;
 
 endmodule

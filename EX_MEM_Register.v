@@ -1,15 +1,15 @@
 module exmem(haltIn, memReadIn, memWriteIn, memToRegIn, regWriteIn, pcsIn, opcodeIn, newPCIn, rtForwardIn, rtIn, writeRegIn,
             haltOut, memReadOut, memWriteOut, memToRegOut, regWriteOut, pcsOut, opcodeOut, newPCOut, rtForwardOut, rtOut, writeRegOut,
-clk, rst, en, aluIn, aluOut);
+clk, rst, en, aluIn, aluOut, instrIn, instrOut);
 
 
 input clk, rst, en, haltIn, memReadIn, memWriteIn, memToRegIn, regWriteIn, pcsIn;
 input [3:0] opcodeIn, writeRegIn, rtForwardIn;
-input [15:0] newPCIn, rtIn, aluIn;
+input [15:0] newPCIn, rtIn, aluIn, instrIn;
 
 output haltOut, memReadOut, memWriteOut, memToRegOut, regWriteOut, pcsOut;
 output [3:0] writeRegOut, opcodeOut, rtForwardOut;
-output [15:0] newPCOut, rtOut, aluOut;
+output [15:0] newPCOut, rtOut, aluOut, instrOut;
 
 dff halt (.d(haltIn), .q(haltOut), .wen(en), .clk(clk), .rst(rst));
 dff memRead (.d(memReadIn), .q(memReadOut), .wen(en), .clk(clk), .rst(rst));
@@ -35,5 +35,6 @@ dff rtFwdFF3(.d(rtForwardIn[3]), .q(rtForwardOut[3]), .wen(en), .clk(clk), .rst(
 Register newPC (.D(newPCIn), .WriteReg(en), .ReadEnable1(1'b1), .ReadEnable2(1'b0), .Bitline1(newPCOut), .Bitline2(), .clk(clk), .rst(rst));
 Register rt (.D(rtIn), .WriteReg(en), .ReadEnable1(1'b1), .ReadEnable2(1'b0), .Bitline1(rtOut), .Bitline2(), .clk(clk), .rst(rst));
 Register alu (.D(aluIn), .WriteReg(en), .ReadEnable1(1'b1), .ReadEnable2(1'b0), .Bitline1(aluOut), .Bitline2(), .clk(clk), .rst(rst));
+Register instr (.D(instrIn), .WriteReg(en), .ReadEnable1(1'b1), .ReadEnable2(1'b0), .Bitline1(instrOut), .Bitline2(), .clk(clk), .rst(rst));
 
 endmodule

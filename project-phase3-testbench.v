@@ -1,4 +1,4 @@
-module cpu_ptb_3();
+module cpu_ptb_final();
   
 
    wire [15:0] PC;
@@ -208,16 +208,16 @@ module cpu_ptb_3();
    assign MemDataOut = DUT.memDataOut;
    // If there's a memory read in this cycle, this is the data being read out of memory (16 bits)
 
-   assign ICacheReq = ~Halt;
+   assign ICacheReq = 1'b1;
    // Signal indicating a valid instruction read request to cache
    
-   assign ICacheHit = DUT.ich;
+   assign ICacheHit = ~DUT.i_miss & (~DUT.stall_cache);
    // Signal indicating a valid instruction cache hit
 
-   assign DCacheReq = DUT.memEnable;
+   assign DCacheReq = (DUT.exmemMemWrite | DUT.exmemMemRead) & (~DUT.stall_cache);
    // Signal indicating a valid instruction data read or write request to cache
    
-   assign DCacheHit = DUT.dch;
+   assign DCacheHit = ~DUT.d_miss & (~DUT.stall_cache);
    // Signal indicating a valid data cache hit
 
 
@@ -234,7 +234,7 @@ module cpu_ptb_3();
    assign rs = DUT.rs;
    assign rt = DUT.rt;
 
-   assign stall = DUT.stall;
+   assign stall = DUT.stall_cache;
 
 
    /* Add anything else you want here */
