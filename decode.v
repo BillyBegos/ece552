@@ -13,7 +13,7 @@ assign out =
 	0;
 endmodule
 
-module Decode532(in, out);
+module Decoder532(in, out);
 input[4 : 0] in;
 output[31 : 0] out;
 assign out = 
