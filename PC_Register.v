@@ -3,7 +3,7 @@ module PC_Register (q, d, wen, clk, rst);
     output         [15:0] q;
     input 	   	   wen, clk, rst; 
 	dff ff0(.q(q[0]), .d(d[0]), .wen(wen), .clk(clk), .rst(rst));
-	dff ff1(.q(q[1]), .d(d[1]), .wen(wen), .clk(clk), .rst(rst));
+	dff ff112(.q(q[1]), .d(d[1]), .wen(wen), .clk(clk), .rst(rst));
 	dff ff2(.q(q[2]), .d(d[2]), .wen(wen), .clk(clk), .rst(rst));
 	dff ff3(.q(q[3]), .d(d[3]), .wen(wen), .clk(clk), .rst(rst));
 	dff ff4(.q(q[4]), .d(d[4]), .wen(wen), .clk(clk), .rst(rst));

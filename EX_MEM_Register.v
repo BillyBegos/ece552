@@ -28,6 +28,7 @@ dff opcodeRegFF1(.d(opcodeIn[1]), .q(opcodeOut[1]), .wen(en), .clk(clk), .rst(rs
 dff opcodeRegFF2(.d(opcodeIn[2]), .q(opcodeOut[2]), .wen(en), .clk(clk), .rst(rst));
 dff opcodeRegFF3(.d(opcodeIn[3]), .q(opcodeOut[3]), .wen(en), .clk(clk), .rst(rst));
 
+dff rtFwdFF0(.d(rtForwardIn[0]), .q(rtForwardOut[0]), .wen(en), .clk(clk), .rst(rst));
 dff rtFwdFF1(.d(rtForwardIn[1]), .q(rtForwardOut[1]), .wen(en), .clk(clk), .rst(rst));
 dff rtFwdFF2(.d(rtForwardIn[2]), .q(rtForwardOut[2]), .wen(en), .clk(clk), .rst(rst));
 dff rtFwdFF3(.d(rtForwardIn[3]), .q(rtForwardOut[3]), .wen(en), .clk(clk), .rst(rst));

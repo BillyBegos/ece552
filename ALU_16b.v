@@ -93,7 +93,7 @@ assign rd = (Opcode == 4'd0) ? addOut:
     FLAG[1] = V = overflow
     FLAG[2] = N = sign
 */
-wire zEnable, vEnable, nEnable, n, v;
+wire zEnable, vEnable, nEnable, n, v, zOut, nOut, vOut;
 assign v = ((Opcode == 4'd0) & (OvflAdd)) ? 1'b1 :
 			((Opcode == 4'd1) & (OvflSub)) ? 1'b1 :
 			1'b0;
@@ -105,11 +105,13 @@ assign zEnable = ((Opcode == 4'd0) | (Opcode == 4'd1) | (Opcode == 4'd2) |(Opcod
 assign vEnable = ((Opcode == 4'd0) | (Opcode == 4'd1)) & |inst;
 assign nEnable = ((Opcode == 4'd0) | (Opcode == 4'd1)) & |inst;
 
+assign FLAG[0] = zEnable ? rd==16'd0 : zOut;
+assign FLAG[1] = vEnable ? v : vOut;
+assign FLAG[2] = nEnable ? n : nOut;
 
-
-dff zeroFlag(.q(FLAG[0]),.d((rd == 16'd0)),.wen(zEnable),.clk(clk),.rst(rst));
-dff overflowFlag(.q(FLAG[1]),.d(v),.wen(vEnable),.clk(clk),.rst(rst));
-dff signFlag(.q(FLAG[2]),.d(n),.wen(nEnable),.clk(clk),.rst(rst));
+dff zeroFlag(.q(zOut),.d((rd == 16'd0)),.wen(zEnable),.clk(clk),.rst(rst));
+dff overflowFlag(.q(vOut),.d(v),.wen(vEnable),.clk(clk),.rst(rst));
+dff signFlag(.q(nOut),.d(n),.wen(nEnable),.clk(clk),.rst(rst));
 
 endmodule
 

@@ -17,5 +17,3 @@ module MCell( input clk,  input rst, input Din, input WriteEnable, input Enable,
 	dff dffm(.q(q), .d(Din), .wen(Enable & WriteEnable), .clk(clk), .rst(rst));
 endmodule
 
-// get outta here with that inability to read same cycle, who do you think you are
-

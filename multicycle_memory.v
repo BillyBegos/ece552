@@ -33,7 +33,7 @@ module memory4c (data_out, data_in, addr, enable, wr, clk, rst, data_valid);
    input          clk;
    input          rst;
    wire [15:0]    data_out_4;
-   reg [15:0]    data_out_3, data_out_2, data_out_1;
+   reg [15:0]    data_out3, data_out2, data_out1;
    wire    data_valid_4;
    reg     data_valid_3, data_valid_2, data_valid_1;
 
@@ -50,7 +50,7 @@ module memory4c (data_out, data_in, addr, enable, wr, clk, rst, data_valid);
       if (rst) begin
          //load loadfile_all.img
          if (!loaded) begin
-            $readmemh("loadfile_1.img", mem);
+            $readmemh("loadfile_4.img", mem);
             loaded = 1;
          end
 
@@ -64,9 +64,9 @@ module memory4c (data_out, data_in, addr, enable, wr, clk, rst, data_valid);
 
   always @(posedge clk) begin
         if (rst) begin
-                data_out_3 <= 0;
-                data_out_2 <= 0;
-                data_out_1 <= 0;
+                data_out3 <= 0;
+                data_out2 <= 0;
+                data_out1 <= 0;
                 data_out <= 0;
 
                 data_valid_3 <= 0;
@@ -75,10 +75,10 @@ module memory4c (data_out, data_in, addr, enable, wr, clk, rst, data_valid);
                 data_valid <= 0;
         end
         else begin
-                data_out_3 <= data_out_4;
-                data_out_2 <= data_out_3;
-                data_out_1 <= data_out_2;
-                data_out <= data_out_1;
+                data_out3 <= data_out_4;
+                data_out2 <= data_out3;
+                data_out1 <= data_out2;
+                data_out <= data_out1;
 
                 data_valid_3 <= data_valid_4;
                 data_valid_2 <= data_valid_3;
